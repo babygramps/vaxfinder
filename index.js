@@ -6,8 +6,12 @@ const {UserChannelInstance} = require('twilio/lib/rest/chat/v1/service/user/user
 const accountSid = 'ACb8f66665b84f6a92ba03144fc9325826';
 const authToken = '515e13062f695a6ef1e14cc9534ec432';
 const client = require('twilio')(accountSid, authToken);
+const wallgreensCall = require('./walgreensCall')
+const latlngGeocoder = require('./latlngGeocoder')
 
 const mongoConnectionString = 'mongodb+srv://pocolypz:XxXcUIp7fl4b4Ojl@cluster0.vdpd4.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+
+const timeInterval = 1000 *60 *60
 
 mongoose.connect(mongoConnectionString, {
     useNewUrlParser: true
@@ -29,15 +33,19 @@ async function getCVSCities() {
     return availableCities
 }
 
+
+    
+}
+
 async function matchCities() {
     const cvsCities = await getCVSCities()
     const users = await Users.find()
 
 
     users.filter(user => {
-        console.log(cvsCities)
 
         let matchedCities = []
+
         if (user.optIn === true) {
             for (i = 0; i < cvsCities.length; i ++) {
                 for (j = 0; j < user.cities.length; j ++) {
@@ -48,6 +56,7 @@ async function matchCities() {
                     }
                 }
             }
+            // searchWallgreens(user.zipCode)
         }
 
         const messageBody = 
@@ -75,4 +84,8 @@ async function matchCities() {
 
 }
 
-matchCities()
+
+
+setInterval(()=> {
+    matchCities()
+}, timeInterval)
